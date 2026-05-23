@@ -1,0 +1,23 @@
+accessWidener v2 official
+
+accessible class net/minecraft/world/inventory/BrewingStandMenu$PotionSlot
+accessible method net/minecraft/server/commands/LocateCommand dist (IIII)F
+accessible class net/minecraft/server/commands/AdvancementCommands$Action
+accessible field net/minecraft/world/food/FoodData exhaustionLevel F
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+accessible field net/minecraft/client/gui/components/Button onPress Lnet/minecraft/client/gui/components/Button$OnPress;
+accessible field net/minecraft/client/gui/components/Button createNarration Lnet/minecraft/client/gui/components/Button$CreateNarration;
+accessible method net/minecraft/world/entity/monster/piglin/PiglinAi getBarterResponseItems (Lnet/minecraft/world/entity/monster/piglin/Piglin;)Ljava/util/List;
+accessible class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+accessible method net/minecraft/client/gui/components/AbstractSelectionList addEntry (Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)I
+accessible method net/minecraft/client/gui/components/PlayerTabOverlay getPlayerInfos ()Ljava/util/List;
+accessible class net/minecraft/world/inventory/ArmorSlot
+accessible method net/minecraft/world/level/portal/PortalForcer canHostFrame (Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos$MutableBlockPos;Lnet/minecraft/core/Direction;I)Z
+accessible method net/minecraft/world/level/block/NetherPortalBlock getDimensionTransitionFromExit (Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/BlockUtil$FoundRectangle;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/portal/TeleportTransition$PostTeleportTransition;)Lnet/minecraft/world/level/portal/TeleportTransition;
+accessible field net/minecraft/client/gui/screens/ChatScreen input Lnet/minecraft/client/gui/components/EditBox;
+accessible method net/minecraft/client/gui/Gui tick ()V
+accessible field net/minecraft/world/entity/Entity random Lnet/minecraft/util/RandomSource;
+mutable field net/minecraft/world/entity/Entity random Lnet/minecraft/util/RandomSource;
+accessible method net/minecraft/world/entity/npc/villager/AbstractVillager addOffersFromTradeSet (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/trading/MerchantOffers;Lnet/minecraft/resources/ResourceKey;)V
+accessible class net/minecraft/client/OptionInstance$SliderableValueSet
+accessible method net/minecraft/client/gui/components/AbstractSelectionList clearEntries ()V

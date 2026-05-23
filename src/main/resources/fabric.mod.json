@@ -1,0 +1,45 @@
+{
+	"schemaVersion": 1,
+	"id": "draftout",
+	"version": "1.8.3",
+	"name": "Draftout",
+	"description": "Draftout - local 1v1 lockout bingo with over 250 goals",
+	"authors": [
+		"Mar1n"
+	],
+	"contact": {},
+	"license": "All-Rights-Reserved",
+	"environment": "*",
+	"accessWidener": "draftout.accesswidener",
+	"entrypoints": {
+		"preLaunch": [
+			"com.draftoutmc.draftout.DisallowedModsPreLaunch"
+		],
+		"client": [
+			"com.draftoutmc.draftout.client.LockoutClient"
+		],
+		"main": [
+			"com.draftoutmc.draftout.Initializer"
+		]
+	},
+
+	"mixins": [
+		"draftout.mixins.json"
+	],
+	"breaks": {
+		"lockout": "*"
+	},
+	"depends": {
+		"fabricloader": "\u003e\u003d0.18.6",
+		"fabric-api": "\u003e\u003d0.18.6",
+		"minecraft": "26.1.1"
+	},
+	"jars": [
+		{
+			"file": "META-INF/jars/Java-WebSocket-1.5.4.jar"
+		},
+		{
+			"file": "META-INF/jars/fabric-api-0.145.3+26.1.1.jar"
+		}
+	]
+}

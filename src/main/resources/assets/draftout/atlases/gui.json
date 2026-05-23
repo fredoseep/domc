@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "type": "single",
+      "resource": "lockout:recovery_compass_16",
+      "sprite": "lockout:recovery_compass_16"
+    }
+  ]
+}
