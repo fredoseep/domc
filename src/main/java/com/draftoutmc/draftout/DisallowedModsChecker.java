@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.draftoutmc.draftout;
 
 import java.nio.file.Path;
@@ -9,11 +14,18 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DisallowedModsPreLaunch implements PreLaunchEntrypoint {
-   private static final Logger logger = LoggerFactory.getLogger(DisallowedModsPreLaunch.class);
-   private static final Set<String> ALLOWED_MODS = Set.of("draftout", "sodium", "lithium", "planifolia", "speedrunigt", "forceport", "hermes-core", "hermes", "boundlesswindow", "standardsettings");
+public class DisallowedModsChecker implements PreLaunchEntrypoint {
+   private static final Logger logger = LoggerFactory.getLogger(DisallowedModsChecker.class);
+   private static final Set<String> ALLOWED_MODS = Set.of("draftout", "sodium", "lithium", "planifolia", "speedrunigt", "forceport", "hermes-core", "hermes", "boundlesswindow", "standardsettings", "krypton", "commandqmod");
+
+   public DisallowedModsChecker() {
+   }
 
    public void onPreLaunch() {
+      scanAndThrow();
+   }
+
+   public static void scanAndThrow() {
       List<String> disallowed = scanDisallowedModIds();
       if (!disallowed.isEmpty()) {
          String message = buildCrashMessage(disallowed);

@@ -62,8 +62,9 @@ public class LockoutDraftScreen extends Screen {
       }).bounds(this.width - 16 - buttonWidth * 2, this.height - 8 - buttonHeight, buttonWidth, buttonHeight).build();
       this.addRenderableWidget(this.gameMenuButton);
       this.addRenderableWidget(this.viewWorldButton);
+      EditBox oldChatBox = this.chatBox != null ? this.chatBox : this.oldChatBox;
       int var10005 = this.height - buttonHeight - 8;
-      this.chatBox = new EditBox(Minecraft.getInstance().font, 8, var10005, 160, buttonHeight, this.oldChatBox, Component.empty());
+      this.chatBox = new EditBox(Minecraft.getInstance().font, 8, var10005, 160, buttonHeight, oldChatBox, Component.empty());
       this.chatBox.setMaxLength(256);
       this.chatBox.setVisible(true);
       this.setInitialFocus(this.chatBox);

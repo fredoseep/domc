@@ -25,4 +25,8 @@ public class TooltipCache {
    public static List<ItemStack> getItems(String goalId) {
       return (List)ITEMS.getOrDefault(goalId, Collections.emptyList());
    }
+   public static void clearCache() {
+      TOOLTIPS.clear();
+      ITEMS.clear();
+   }
 }

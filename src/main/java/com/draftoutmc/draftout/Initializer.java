@@ -14,6 +14,7 @@ public class Initializer implements ModInitializer {
    public void onInitialize() {
       MOD_VERSION = ((ModContainer)FabricLoader.getInstance().getModContainer("draftout").get()).getMetadata().getVersion();
       LockoutConfig.load();
+      DisallowedModsChecker.scanAndThrow();
       Networking.registerPayloads();
       DefaultGoalRegister.registerGoals();
       LockoutServer.initializeServer();

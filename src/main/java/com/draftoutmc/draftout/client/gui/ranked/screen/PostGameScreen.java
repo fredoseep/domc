@@ -43,7 +43,7 @@ public class PostGameScreen extends Screen {
    private int eloChange;
    private long finalTimeMs;
    private boolean animationStarted = false;
-   private boolean hasEloChange = true;
+   private final boolean hasEloChange;
 
    public PostGameScreen(Map<LockoutMatchData.LockoutMatchPlayer, Integer> eloChanges, EditBox oldChatBox, int magicFlags, long finalTimeMs) {
       super(title);
@@ -54,7 +54,7 @@ public class PostGameScreen extends Screen {
       this.won = (magicFlags & 1) > 0;
       this.finalTimeMs = finalTimeMs;
       Optional<LockoutMatchData.LockoutMatchPlayer> player = eloChanges.keySet().stream().filter((lmp) -> lmp.uuid().equals(Minecraft.getInstance().getUser().getProfileId())).findFirst();
-      this.hasEloChange = player.isPresent() && ((LockoutMatchData.LockoutMatchPlayer)player.get()).ranked();
+      this.hasEloChange = player.isPresent() && ((LockoutMatchData.LockoutMatchPlayer)player.get()).ranked() && eloChanges.containsKey(player.get()) && eloChanges.get(player.get()) != null;
    }
 
    public void tick() {
@@ -96,8 +96,9 @@ public class PostGameScreen extends Screen {
          ServerConnection.getInstance().sendMatchLeave();
          Minecraft.getInstance().setScreen((Screen)null);
       }).bounds(this.width - margin - gap - buttonWidth * 2, this.height - margin - buttonHeight, buttonWidth, buttonHeight).build());
+      EditBox oldChatBox = this.chatBox != null ? this.chatBox : this.oldChatBox;
       int var10005 = this.height - buttonHeight - 8;
-      this.chatBox = new EditBox(Minecraft.getInstance().font, 8, var10005, 160, buttonHeight, this.oldChatBox, Component.empty());
+      this.chatBox = new EditBox(Minecraft.getInstance().font, 8, var10005, 160, buttonHeight, oldChatBox, Component.empty());
       this.chatBox.setMaxLength(256);
       this.chatBox.setVisible(true);
       this.setInitialFocus(this.chatBox);

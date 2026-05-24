@@ -480,7 +480,7 @@ public class ServerConnection extends WebSocketClient {
 
    public static enum Type {
       LOCALHOST("ws://localhost:3000/ws"),
-      SERVER("ws://82.38.2.83:3000/ws");
+      SERVER("wss://play.draftoutmc.com/ws");
 
       private final String path;
 
