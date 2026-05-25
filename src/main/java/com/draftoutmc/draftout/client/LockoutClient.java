@@ -169,7 +169,6 @@ public class LockoutClient implements ClientModInitializer {
       });
       ClientPlayConnectionEvents.DISCONNECT.register((ClientPlayConnectionEvents.Disconnect)(handler, client) -> {
          LockoutMatchData.setLockout((Lockout)null);
-         TooltipCache.clearCache();
       });      ClientTooltipComponentCallback.EVENT.register((ClientTooltipComponentCallback)(data) -> {
          if (data instanceof ItemGridTooltip grid) {
             return new ItemGridClientTooltipComponent(grid);

@@ -112,6 +112,7 @@ public class DraftoutMessageHandler {
       this.sc.onGameMessage("set_goals", msg);
       Minecraft.getInstance().execute(() -> {
          if (LockoutMatchData.isInMatch()) {
+            LockoutServer.resetPlayers();
             LockoutMatchData matchData = LockoutMatchData.CURRENT_MATCH;
             EditBox chat = null;
             Screen patt0$temp = Minecraft.getInstance().screen;

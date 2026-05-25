@@ -10,6 +10,7 @@ import com.draftoutmc.draftout.lockout.Goal;
 import com.draftoutmc.draftout.lockout.GoalRegistry;
 import com.draftoutmc.draftout.lockout.interfaces.HasTooltipInfo;
 import com.draftoutmc.draftout.match.data.LockoutMatchData;
+import com.draftoutmc.draftout.match.data.RankedData;
 import com.draftoutmc.draftout.mixin.server.StatsCounterAccessor;
 import com.draftoutmc.draftout.network.StartLockoutPayload;
 import com.draftoutmc.draftout.server.handlers.AfterDeathEventHandler;
@@ -103,42 +104,47 @@ public class LockoutServer {
 
    }
 
-   public static void startLockout(List<LockoutTeamServer> teams, List<Pair<String, String>> board, long gameTime) {
+   public static void startLockout(List<LockoutTeamServer> teams, List<Pair<String, String>> board, long gameTime, boolean isRejoin) {
       if (LockoutMatchData.isInMatch()) {
          RUNNABLES.clear();
-         List<String> invalidGoals = new ArrayList();
-
-         for(Pair<String, String> entry : board) {
-            if (!GoalRegistry.INSTANCE.isGoalValid((String)entry.getA(), (String)entry.getB())) {
-               String var10001 = (String)entry.getA();
-               invalidGoals.add(" - '" + var10001 + "'" + ("null".equals(entry.getB()) ? "" : " with data: '" + (String)entry.getB() + "'"));
-            }
-         }
-
-         if (!invalidGoals.isEmpty()) {
-            Lockout.log("Invalid board. Could not create goals:\n" + String.join("\n", invalidGoals));
-         }
-
-         LockoutServer.board = new LockoutBoard(board);
          PlayerList playerManager = server.getPlayerList();
          List<ServerPlayer> allServerPlayers = playerManager.getPlayers();
          List<UUID> allLockoutPlayers = teams.stream().flatMap((teamx) -> teamx.getPlayers().stream()).toList();
-         resetPlayers();
-         ServerLevel world = server.createCommandSourceStack().getLevel();
+         Lockout lockout;
+         if (!isRejoin) {
+            List<String> invalidGoals = new ArrayList();
 
-         for(Goal goal : LockoutServer.board.getGoals()) {
-            goal.setCompleted(false, (LockoutTeam)null);
+            for(Pair<String, String> entry : board) {
+               if (!GoalRegistry.INSTANCE.isGoalValid((String)entry.getA(), (String)entry.getB())) {
+                  String var10001 = (String)entry.getA();
+                  invalidGoals.add(" - '" + var10001 + "'" + ("null".equals(entry.getB()) ? "" : " with data: '" + (String)entry.getB() + "'"));
+               }
+            }
+
+            if (!invalidGoals.isEmpty()) {
+               Lockout.log("Invalid board. Could not create goals:\n" + String.join("\n", invalidGoals));
+            }
+
+            LockoutServer.board = new LockoutBoard(board);
+            resetPlayers();
+
+            for(Goal goal : LockoutServer.board.getGoals()) {
+               goal.setCompleted(false, (LockoutTeam)null);
+            }
+
+            LockoutBoard lockoutBoard = LockoutServer.board;
+            lockout = new Lockout(lockoutBoard, teams);
+         } else {
+            lockout = RankedData.lockout();
          }
 
-         LockoutBoard lockoutBoard = LockoutServer.board;
-         Lockout lockout = new Lockout(lockoutBoard, teams);
          LockoutMatchData.setLockout(lockout);
+         RankedData.lockout(lockout);
          lockout.setStartTimeMillis(System.currentTimeMillis() - gameTime);
-         List<Goal> goals = new ArrayList<>(lockout.getBoard().getGoals());
 
-         for (Goal goal : goals) {
+         for(Goal goal : (new ArrayList<>(lockout.getBoard().getGoals())).stream().filter((g) -> g instanceof HasTooltipInfo).toList()) {
             for(LockoutTeam team : lockout.getTeams()) {
-               ((LockoutTeamServer)team).sendTooltipUpdate((Goal & HasTooltipInfo)goal);
+               ((LockoutTeamServer)team).sendTooltipUpdate((Goal&HasTooltipInfo)goal);
             }
          }
 
@@ -147,32 +153,31 @@ public class LockoutServer {
          }
 
          ResourceKey<WorldClock> overworldClock = ResourceKey.create(Registries.WORLD_CLOCK, Identifier.withDefaultNamespace("overworld"));
+         ServerLevel world = server.createCommandSourceStack().getLevel();
          Holder.Reference<WorldClock> clock = world.registryAccess().getOrThrow(overworldClock);
          world.clockManager().setTotalTicks(clock, 0L);
 
          for(int i = 3; i >= 0; --i) {
-            // 修复 1：创建一个事实上的 final 变量供 Lambda 使用
-            final int currentI = i;
+            if (i > 0) {
 
-            if (currentI > 0) {
-               // 修复 2：还原正确的方法调用格式 runTaskAt(Runnable, long)
-               LockoutRunnable uiTask = () -> {
+               int finalI = i;
+               LockoutRunnable lockoutRunnable = () -> {
                   if (!lockout.hasStarted()) {
                      Minecraft.getInstance().gui.setTimes(5, 10, 5);
-                     Minecraft.getInstance().gui.setTitle(Component.literal(String.valueOf(currentI)).withStyle(ChatFormatting.BOLD));
+                     Minecraft.getInstance().gui.setTitle(Component.literal(String.valueOf(finalI)).withStyle(ChatFormatting.BOLD));
                      Minecraft.getInstance().gui.setSubtitle(Component.empty());
                      Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI((SoundEvent)SoundEvents.NOTE_BLOCK_PLING.value(), 1.0F, 1.0F));
                   }
 
-                  if (currentI == 3) {
+                  if (finalI == 3) {
                      server.tickRateManager().setFrozen(false);
                      server.getPlayerList().broadcastSystemMessage(Component.literal("Game ticks have been unfrozen").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), true);
                   }
-               };
-               uiTask.runTaskAt(lockout.getStartTimeMillis() - (long)currentI * 1000L);
 
+               };
+               lockoutRunnable.runTaskAt(lockout.getStartTimeMillis() - (long)i * 1000L);
             } else {
-               LockoutRunnable playerTask = () -> {
+               LockoutRunnable lockoutRunnable = () -> {
                   for(ServerPlayer player : allServerPlayers) {
                      if (player != null) {
                         ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
@@ -186,10 +191,9 @@ public class LockoutServer {
                   Minecraft.getInstance().gui.setTitle(Component.empty());
                   Minecraft.getInstance().gui.setSubtitle(Component.literal("Lockout has begun."));
                   Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI((SoundEvent)SoundEvents.NOTE_BLOCK_PLING.value(), 2.0F, 1.0F));
-                  Minecraft.getInstance().setScreen(null);
+                  Minecraft.getInstance().setScreen((Screen)null);
                };
-               playerTask.runTaskAt(lockout.getStartTimeMillis());
-
+               lockoutRunnable.runTaskAt(lockout.getStartTimeMillis());
             }
          }
 

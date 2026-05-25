@@ -2,6 +2,8 @@ package com.draftoutmc.draftout.match;
 
 import lombok.Generated;
 
+import java.util.Locale;
+
 public enum MatchType {
    QUICK_PLAY("Quick Play"),
    COMPETITIVE("Competitive"),
@@ -14,12 +16,12 @@ public enum MatchType {
    }
 
    public String toString() {
-      return this.name().toLowerCase();
+      return this.name().toLowerCase(Locale.ROOT);
    }
 
    public static MatchType match(String type) {
       for(MatchType value : values()) {
-         if (value.name().equals(type.toUpperCase())) {
+         if (value.name().equals(type.toUpperCase(Locale.ROOT))) {
             return value;
          }
       }

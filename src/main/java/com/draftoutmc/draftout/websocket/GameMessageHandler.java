@@ -1,6 +1,7 @@
 package com.draftoutmc.draftout.websocket;
 
 import com.draftoutmc.draftout.*;
+import com.draftoutmc.draftout.client.TooltipCache;
 import com.draftoutmc.draftout.client.gui.ranked.elements.FadeToScreenTransition;
 import com.draftoutmc.draftout.client.gui.ranked.screen.LockoutInformationScreen;
 import com.draftoutmc.draftout.client.gui.ranked.screen.LockoutMainScreen;
@@ -9,6 +10,7 @@ import com.draftoutmc.draftout.lockout.Goal;
 import com.draftoutmc.draftout.match.MinecraftUtils;
 import com.draftoutmc.draftout.match.WorldCreator;
 import com.draftoutmc.draftout.match.data.LockoutMatchData;
+import com.draftoutmc.draftout.match.data.RankedData;
 import com.draftoutmc.draftout.server.LockoutServer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -30,6 +32,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -127,6 +130,7 @@ public class GameMessageHandler {
          long worldSeed = data.get("worldSeed").getAsLong();
          matchData.worldSeed(worldSeed);
          matchData.startingWorldGenAt(0L);
+         TooltipCache.clearCache();
          MinecraftUtils.notMinecraft$execute(() -> {
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_DROP_CONTENTS, 0.75F, 2.0F));
             if (Minecraft.getInstance().player != null) {
@@ -136,6 +140,7 @@ public class GameMessageHandler {
             String baseName = "lockout-match";
             String uniqueName = WorldCreator.makeUniqueWorldName(baseName);
             WorldCreator.createWorld(uniqueName, worldSeed);
+            RankedData.worldName(uniqueName);
          });
       }
    }
@@ -169,8 +174,8 @@ public class GameMessageHandler {
             for(LockoutMatchData.LockoutMatchPlayer player : LockoutMatchData.CURRENT_MATCH.players()) {
                teams.add(player.lockoutTeamServer());
             }
-
-            LockoutServer.startLockout(teams, matchData.goals, gameTime);
+            boolean rejoinLockout = !Utility.isJsonNull(msg.get("rejoin")) && msg.get("rejoin").getAsBoolean() && RankedData.lockout() != null;
+            LockoutServer.startLockout(teams, matchData.goals, gameTime,rejoinLockout);
          }
       });
    }
@@ -224,6 +229,8 @@ public class GameMessageHandler {
       LockoutMatchData matchData = LockoutMatchData.CURRENT_MATCH;
       Lockout lockout = LockoutMatchData.getLockout();
       LockoutServer.RUNNABLES.clear();
+      RankedData.worldName((String)null);
+      RankedData.lockout((Lockout)null);
       long finalTime;
       if (lockout != null) {
          finalTime = msg.get("finalTime") == null ? System.currentTimeMillis() - lockout.getStartTimeMillis() : msg.get("finalTime").getAsLong();
@@ -458,24 +465,32 @@ public class GameMessageHandler {
       MinecraftUtils.notMinecraft$execute(() -> {
          LockoutMatchData matchData = LockoutMatchData.CURRENT_MATCH;
          if (LockoutMatchData.isInMatch()) {
-            matchData.isRejoin(true);
-            matchData.gotGameData(true);
             long worldSeed = msg.get("worldSeed").getAsLong();
+            matchData.gotGameData(true);
             matchData.worldSeed(worldSeed);
             matchData.startingWorldGenAt(0L);
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_DROP_CONTENTS, 0.75F, 2.0F));
-            if (Minecraft.getInstance().player != null) {
-               Minecraft.getInstance().disconnectFromWorld(Component.literal("Queue found..."));
+            matchData.isRejoin(true);
+            if (!Utility.isJsonNull(msg.get("rejoin")) && msg.get("rejoin").getAsBoolean()) {
+               WorldOpenFlows worldOpenFlows = Minecraft.getInstance().createWorldOpenFlows();
+               worldOpenFlows.openWorld(RankedData.worldName(), () -> Minecraft.getInstance().disconnect(new LockoutInformationScreen("Could not rejoin world. Try restarting your game."), false, true));
+            } else {
+               Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_DROP_CONTENTS, 0.75F, 2.0F));
+               if (Minecraft.getInstance().player != null) {
+                  Minecraft.getInstance().disconnectFromWorld(Component.literal("Queue found..."));
+               }
+
+               String baseName = "lockout-match";
+               String uniqueName = WorldCreator.makeUniqueWorldName(baseName);
+               RankedData.worldName(uniqueName);
+               WorldCreator.createWorld(uniqueName, worldSeed);
             }
 
-            String baseName = "lockout-match";
-            String uniqueName = WorldCreator.makeUniqueWorldName(baseName);
-            WorldCreator.createWorld(uniqueName, worldSeed);
          }
       });
    }
 
    private void handleRejoinState(JsonObject msg) {
+      Lockout.log(msg.toString());
       this.handleSetGoals(msg);
       this.handleStartLockout(msg);
       LockoutMatchData.CURRENT_MATCH.isRejoin(false);

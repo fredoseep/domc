@@ -115,7 +115,7 @@ public class ServerConnection extends WebSocketClient {
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.ANVIL_DESTROY, 1.0F));
          }
 
-         if (matchData != null && Minecraft.getInstance().level != null) {
+         if (matchData != null && Minecraft.getInstance().getSingleplayerServer() != null) {
             Minecraft.getInstance().disconnect(new LockoutInformationScreen("Disconnected from server.\nTry reconnecting."), false, true);
          }
 
@@ -345,6 +345,7 @@ public class ServerConnection extends WebSocketClient {
          payload.addProperty("username", username);
          payload.addProperty("uuid", uuid.toString());
          payload.addProperty("serverId", this.serverId);
+         payload.addProperty("reconnect", RankedData.worldName() != null);
          this.sendMessage("auth.connect", payload);
       } catch (AuthenticationException var8) {
          this.close();

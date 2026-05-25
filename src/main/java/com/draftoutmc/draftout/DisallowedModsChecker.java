@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class DisallowedModsChecker implements PreLaunchEntrypoint {
    private static final Logger logger = LoggerFactory.getLogger(DisallowedModsChecker.class);
-   private static final Set<String> ALLOWED_MODS = Set.of("draftout", "sodium", "lithium", "planifolia", "speedrunigt", "forceport", "hermes-core", "hermes", "boundlesswindow", "standardsettings", "krypton", "commandqmod");
+   private static final Set<String> ALLOWED_MODS = Set.of("draftout", "sodium", "lithium", "planifolia", "speedrunigt", "forceport", "hermes-core", "hermes", "boundlesswindow", "standardsettings", "krypton", "commandqmod", "speedrunapi");
 
    public DisallowedModsChecker() {
    }
