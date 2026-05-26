@@ -1,12 +1,13 @@
 package com.draftoutmc.draftout;
 
 import java.util.List;
+
+import com.draftoutmc.draftout.lockout.Goal;
 import lombok.Generated;
 
 public class LockoutTeam {
    private final List<String> players;
    private final int color;
-   private int points = 0;
    private boolean forfeited = false;
 
    public LockoutTeam(List<String> playerNames, int color) {
@@ -22,12 +23,20 @@ public class LockoutTeam {
       return (String)this.players.getFirst();
    }
 
-   public void addPoint() {
-      ++this.points;
-   }
+   public int getPoints(Lockout lockout) {
+      if (!Lockout.exists(lockout)) {
+         return 0;
+      } else {
+         int points = 0;
 
-   public void takePoint() {
-      --this.points;
+         for(Goal goal : lockout.getBoard().getGoals()) {
+            if (goal.isCompleted() && this.equals(goal.getCompletedTeam())) {
+               ++points;
+            }
+         }
+
+         return points;
+      }
    }
 
    @Generated
@@ -35,10 +44,6 @@ public class LockoutTeam {
       return this.color;
    }
 
-   @Generated
-   public int getPoints() {
-      return this.points;
-   }
 
    @Generated
    public boolean isForfeited() {

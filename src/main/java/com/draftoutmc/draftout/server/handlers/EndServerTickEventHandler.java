@@ -42,25 +42,11 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                      }
                   }
 
-                  if (goal instanceof RideEntityGoal) {
-                     RideEntityGoal rideEntityGoal = (RideEntityGoal)goal;
-                     if (player.isPassenger()) {
+                  if (goal instanceof RideEntityGoal rideEntityGoal) {
+                      if (player.isPassenger()) {
                         EntityType<?> vehicle = player.getVehicle().getType();
-                        if (Objects.equals(vehicle, rideEntityGoal.getEntityType())) {
-                           boolean allow = true;
-                           if (Objects.equals(vehicle, EntityType.PIG)) {
-                              boolean hasCarrotOnAStick = false;
-                              ItemStack handItem = player.getInventory().getSelectedItem();
-                              if (handItem.getItem().equals(Items.CARROT_ON_A_STICK)) {
-                                 hasCarrotOnAStick = true;
-                              }
-
-                              allow = hasCarrotOnAStick;
-                           }
-
-                           if (allow) {
-                              lockout.completeGoal(goal, (Player)player);
-                           }
+                        if (rideEntityGoal.getEntityType().equals(vehicle)) {
+                           lockout.completeGoal(goal, player);
                         }
                      }
                   }

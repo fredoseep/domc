@@ -55,7 +55,6 @@ public class LockoutClient implements ClientModInitializer {
             if (completedByTeam[i] != -1) {
                LockoutTeam team = (LockoutTeam)lockout.getTeams().get(completedByTeam[i]);
                ((Goal)goalList.get(i)).setCompleted(true, team);
-               team.addPoint();
             }
          }
 
@@ -85,7 +84,6 @@ public class LockoutClient implements ClientModInitializer {
 
             if (payload.teamIndex() != -1) {
                LockoutTeam team = (LockoutTeam)lockout.getTeams().get(payload.teamIndex());
-               team.addPoint();
                goal.setCompleted(true, (LockoutTeam)lockout.getTeams().get(payload.teamIndex()));
                if (client.player != null && amIPlayingLockout && !team.getPlayerNames().contains(client.player.getName().getString())) {
                   client.player.playSound(SoundEvents.GUARDIAN_DEATH, 2.0F, 1.0F);

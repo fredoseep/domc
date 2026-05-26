@@ -8,7 +8,9 @@ import com.draftoutmc.draftout.client.gui.ranked.elements.ItemGridClientTooltipC
 import com.draftoutmc.draftout.client.gui.ranked.elements.ItemGridTooltip;
 import com.draftoutmc.draftout.lockout.Goal;
 import com.draftoutmc.draftout.lockout.interfaces.HasTooltipInfo;
+import com.draftoutmc.draftout.match.data.LockoutMatchData;
 import com.draftoutmc.draftout.match.data.RankedData;
+import com.draftoutmc.draftout.mixin.client.ConnectScreenAccessor;
 import com.draftoutmc.draftout.websocket.ServerConnection;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -30,12 +32,15 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import io.netty.channel.ChannelFuture;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -91,7 +96,7 @@ public class Utility {
          MutableComponent scoreComponent = Component.empty();
 
          for(LockoutTeam team : lockoutTeams) {
-            scoreComponent.append(Component.literal(String.valueOf(team.getPoints())).withColor(team.getColor()));
+            scoreComponent.append(Component.literal(String.valueOf(team.getPoints(LockoutMatchData.getLockout()))).withColor(team.getColor()));
             if (!team.equals(lockoutTeams.getLast())) {
                scoreComponent.append(Component.literal("-").withStyle(ChatFormatting.GRAY));
             }
@@ -520,6 +525,21 @@ public class Utility {
          return var12;
       } catch (Exception var11) {
          return false;
+      }
+   }
+   public static void abortServerConnect(ConnectScreen connectScreen) {
+      ConnectScreenAccessor accessor = (ConnectScreenAccessor)connectScreen;
+      synchronized(connectScreen) {
+         accessor.setAborted(true);
+         if (accessor.getChannelFuture() != null) {
+            accessor.getChannelFuture().cancel(true);
+            accessor.setChannelFuture((ChannelFuture)null);
+         }
+
+         if (accessor.getConnection() != null) {
+            accessor.getConnection().disconnect(ConnectScreen.ABORT_CONNECTION);
+         }
+
       }
    }
 }

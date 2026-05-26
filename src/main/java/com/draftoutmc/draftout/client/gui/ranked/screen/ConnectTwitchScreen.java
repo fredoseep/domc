@@ -27,6 +27,7 @@ public class ConnectTwitchScreen extends Screen {
       int gap = 4;
       int buttonY = this.height / 2 + 20;
       this.addRenderableWidget(Button.builder(Component.literal("Open in browser"), (bb) -> Util.getPlatform().openUri(this.url)).bounds(this.width / 2 - buttonWidth / 2, buttonY, buttonWidth, buttonHeight).build());
+      this.addRenderableWidget(Button.builder(Component.literal("Copy URL to Clipboard"), (bb) -> this.minecraft.keyboardHandler.setClipboard(this.url)).bounds(this.width / 2 - buttonWidth / 2, buttonY + buttonHeight + gap, buttonWidth, buttonHeight).build());
       this.addRenderableWidget(Button.builder(Component.literal("Back to Main Menu"), (bb) -> Minecraft.getInstance().setScreen(new LockoutMainScreen())).bounds(this.width / 2 - buttonWidth / 2, buttonY + buttonHeight + gap, buttonWidth, buttonHeight).build());
    }
 

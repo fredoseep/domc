@@ -136,7 +136,6 @@ public class Lockout {
    }
 
    public void onGoalCompleted(Goal goal, LockoutTeam team, String message) {
-      team.addPoint();
       goal.setCompleted(true, team);
       goal.setMarkedAsCompleted(true);
       boolean hadCompleted = goal.getPendingChatMessage() != null;
@@ -179,7 +178,6 @@ public class Lockout {
             LockoutTeamServer winnerTeam = isWinner ? (LockoutTeamServer)team : opponentTeam;
             LockoutTeamServer loserTeam = isWinner ? opponentTeam : (LockoutTeamServer)team;
             goal.setCompleted(true, winnerTeam);
-            winnerTeam.addPoint();
             String var10001 = String.valueOf(ChatFormatting.GREEN);
             winnerTeam.sendMessage(var10001 + message);
             var10001 = String.valueOf(ChatFormatting.RED);
@@ -200,7 +198,6 @@ public class Lockout {
 
    public void clearGoalCompletion(Goal goal, boolean sendPacket) {
       if (goal.isCompleted()) {
-         goal.getCompletedTeam().takePoint();
          goal.setCompleted(false, (LockoutTeam)null);
          if (sendPacket) {
             CompleteTaskPayload payload = new CompleteTaskPayload(goal.getId(), -1);
@@ -231,7 +228,7 @@ public class Lockout {
          this.setRunning(false);
       } else if (this.getRemainingGoals() == 0 && this.teams.size() > 1) {
          int maxCompleted = this.getMostCompletedGoals();
-         List<? extends LockoutTeam> winnerTeams = this.teams.stream().filter((t) -> t.getPoints() == maxCompleted).toList();
+         List<? extends LockoutTeam> winnerTeams = this.teams.stream().filter((t) -> t.getPoints(this) == maxCompleted).toList();
          winners.addAll(winnerTeams);
          playerManager.broadcastSystemMessage(Component.literal("It's a tie! " + getWinnerTeamsString(winnerTeams) + " win."), false);
          this.setRunning(false);
@@ -240,7 +237,7 @@ public class Lockout {
    }
 
    public int getMostCompletedGoals() {
-      return ((LockoutTeam)this.teams.stream().max(Comparator.comparingInt(LockoutTeam::getPoints)).get()).getPoints();
+      return ((LockoutTeam)this.teams.stream().max(Comparator.comparingInt((t) -> t.getPoints(this))).get()).getPoints(this);
    }
 
    public boolean hasStarted() {
@@ -296,7 +293,7 @@ public class Lockout {
          return this.getRemainingGoals() == 0;
       } else {
          for(LockoutTeam t : this.teams) {
-            if (team != t && t.getPoints() + this.getRemainingGoals() >= team.getPoints()) {
+            if (team != t && t.getPoints(this) + this.getRemainingGoals() >= team.getPoints(this)) {
                return false;
             }
          }

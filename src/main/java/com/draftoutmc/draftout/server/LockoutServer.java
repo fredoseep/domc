@@ -134,6 +134,10 @@ public class LockoutServer {
 
             LockoutBoard lockoutBoard = LockoutServer.board;
             lockout = new Lockout(lockoutBoard, teams);
+            ResourceKey<WorldClock> overworldClock = ResourceKey.create(Registries.WORLD_CLOCK, Identifier.withDefaultNamespace("overworld"));
+            ServerLevel world = server.createCommandSourceStack().getLevel();
+            Holder.Reference<WorldClock> clock = world.registryAccess().getOrThrow(overworldClock);
+            world.clockManager().setTotalTicks(clock, 0L);
          } else {
             lockout = RankedData.lockout();
          }
@@ -152,10 +156,6 @@ public class LockoutServer {
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
          }
 
-         ResourceKey<WorldClock> overworldClock = ResourceKey.create(Registries.WORLD_CLOCK, Identifier.withDefaultNamespace("overworld"));
-         ServerLevel world = server.createCommandSourceStack().getLevel();
-         Holder.Reference<WorldClock> clock = world.registryAccess().getOrThrow(overworldClock);
-         world.clockManager().setTotalTicks(clock, 0L);
 
          for(int i = 3; i >= 0; --i) {
             if (i > 0) {
@@ -187,10 +187,13 @@ public class LockoutServer {
                      }
                   }
 
-                  Minecraft.getInstance().gui.setTimes(5, 10, 5);
-                  Minecraft.getInstance().gui.setTitle(Component.empty());
-                  Minecraft.getInstance().gui.setSubtitle(Component.literal("Lockout has begun."));
-                  Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI((SoundEvent)SoundEvents.NOTE_BLOCK_PLING.value(), 2.0F, 1.0F));
+                  if (!isRejoin) {
+                     Minecraft.getInstance().gui.setTimes(5, 10, 5);
+                     Minecraft.getInstance().gui.setTitle(Component.empty());
+                     Minecraft.getInstance().gui.setSubtitle(Component.literal("Lockout has begun."));
+                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI((SoundEvent)SoundEvents.NOTE_BLOCK_PLING.value(), 2.0F, 1.0F));
+                  }
+
                   Minecraft.getInstance().setScreen((Screen)null);
                };
                lockoutRunnable.runTaskAt(lockout.getStartTimeMillis());

@@ -25,7 +25,7 @@ public class PauseScreenMixin<T extends LayoutElement> {
 )
    )
    public T replaceOpenToLanButton(T widget) {
-      if (LockoutMatchData.isInMatch()) {
+      if (LockoutMatchData.isInMatchWorld()) {
          Button button = Button.builder(Component.literal("-"), (b) -> {
          }).width(98).build();
          button.active = false;
@@ -43,7 +43,7 @@ public class PauseScreenMixin<T extends LayoutElement> {
 )
    )
    public T removeQuitButton(GridLayout.RowHelper instance, T widget, int columnWidth) {
-      if (!LockoutMatchData.isInMatch()) {
+      if (!LockoutMatchData.isInMatchWorld()) {
          return (T)instance.addChild(widget, columnWidth);
       } else {
          Lockout lockout = LockoutMatchData.getLockout();

@@ -279,7 +279,7 @@ public class PostGameScreen extends Screen {
       MutableComponent pointsComponent = Component.empty().append(Component.literal("Final score: ").withStyle(ChatFormatting.WHITE));
 
       for(LockoutTeam team : lockout.getTeams()) {
-         pointsComponent.append(Component.literal(String.valueOf(team.getPoints())).withColor(team.getColor()));
+         pointsComponent.append(Component.literal(String.valueOf(team.getPoints(lockout))).withColor(team.getColor()));
          if (!team.equals(lockout.getTeams().getLast())) {
             pointsComponent.append(Component.literal("-").withStyle(ChatFormatting.GRAY));
          }

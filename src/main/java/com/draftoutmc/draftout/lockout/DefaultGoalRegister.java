@@ -499,17 +499,6 @@ public class DefaultGoalRegister {
       GoalRegistry.INSTANCE.register("GET_20_ADVANCEMENTS", Get20UniqueAdvancementsGoal.class);
       GoalRegistry.INSTANCE.register("GET_30_ADVANCEMENTS", Get30UniqueAdvancementsGoal.class);
       GoalRegistry.INSTANCE.register("WEAR_UNIQUE_COLORED_LEATHER_ARMOR", WearUniqueColoredLeatherArmorGoal.class);
-      GoalRegistry.INSTANCE.register("KILL_OTHER_PLAYER", KillOtherTeamPlayer.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_OBTAINS_CRAFTING_TABLE", OpponentObtainsCraftingTableGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_OBTAINS_OBSIDIAN", OpponentObtainsObsidianGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_OBTAINS_SEEDS", OpponentObtainsSeedsGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_CATCHES_ON_FIRE", OpponentCatchesOnFireGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_DIES_3_TIMES", OpponentDies3TimesGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_DIES", OpponentDiesGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_TAKES_100_DAMAGE", OpponentTakes100DamageGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_TAKES_FALL_DAMAGE", OpponentTakesFallDamageGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_TOUCHES_WATER", OpponentTouchesWaterGoal.class);
-      GoalRegistry.INSTANCE.register("OPPONENT_EATS_FOOD", OpponentEatsFoodGoal.class);
       GoalRegistry.INSTANCE.register("TAKE_200_DAMAGE", Take200DamageGoal.class);
       GoalRegistry.INSTANCE.register("REACH_NETHER_ROOF", ReachNetherRoofGoal.class);
       GoalRegistry.INSTANCE.register("FREEZE_TO_DEATH", DieByFreezingGoal.class);

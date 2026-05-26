@@ -31,6 +31,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -133,8 +134,15 @@ public class GameMessageHandler {
          TooltipCache.clearCache();
          MinecraftUtils.notMinecraft$execute(() -> {
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_DROP_CONTENTS, 0.75F, 2.0F));
-            if (Minecraft.getInstance().player != null) {
+            if (Minecraft.getInstance().getConnection() != null) {
                Minecraft.getInstance().disconnectFromWorld(Component.literal("Queue found..."));
+            } else {
+               Screen patt0$temp = Minecraft.getInstance().screen;
+               if (patt0$temp instanceof ConnectScreen) {
+                  ConnectScreen connectScreen = (ConnectScreen) patt0$temp;
+                  Utility.abortServerConnect(connectScreen);
+                  Minecraft.getInstance().setScreen(new LockoutMainScreen());
+               }
             }
 
             String baseName = "lockout-match";
@@ -169,12 +177,16 @@ public class GameMessageHandler {
          LockoutMatchData matchData = LockoutMatchData.CURRENT_MATCH;
          if (LockoutMatchData.isInMatch()) {
             long gameTime = msg.get("gameTime").getAsLong();
-            List<LockoutTeamServer> teams = new ArrayList();
-
-            for(LockoutMatchData.LockoutMatchPlayer player : LockoutMatchData.CURRENT_MATCH.players()) {
-               teams.add(player.lockoutTeamServer());
-            }
             boolean rejoinLockout = !Utility.isJsonNull(msg.get("rejoin")) && msg.get("rejoin").getAsBoolean() && RankedData.lockout() != null;
+            List<LockoutTeamServer> teams = new ArrayList<>();
+
+            if (!rejoinLockout) {
+               for(LockoutMatchData.LockoutMatchPlayer player : LockoutMatchData.CURRENT_MATCH.players()) {
+                  teams.add(player.lockoutTeamServer());
+               }
+            } else {
+               teams = (List<LockoutTeamServer>) RankedData.lockout().getTeams();
+            }
             LockoutServer.startLockout(teams, matchData.goals, gameTime,rejoinLockout);
          }
       });
@@ -490,26 +502,27 @@ public class GameMessageHandler {
    }
 
    private void handleRejoinState(JsonObject msg) {
-      Lockout.log(msg.toString());
       this.handleSetGoals(msg);
       this.handleStartLockout(msg);
       LockoutMatchData.CURRENT_MATCH.isRejoin(false);
       Minecraft.getInstance().execute(() -> {
-         for(JsonElement completedGoalElement : msg.get("completedGoals").getAsJsonArray()) {
-            JsonObject completedGoal = completedGoalElement.getAsJsonObject();
-            int goalIdx = completedGoal.get("goalIndex").getAsInt();
-            UUID uuid = UUID.fromString(completedGoal.get("completedByUuid").getAsString());
-            Lockout lockout = LockoutMatchData.getLockout();
-            if (lockout == null) {
-               return;
+         Lockout lockout = LockoutMatchData.getLockout();
+         if (lockout != null) {
+            for(JsonElement completedGoalElement : msg.get("completedGoals").getAsJsonArray()) {
+               JsonObject completedGoal = completedGoalElement.getAsJsonObject();
+               int goalIdx = completedGoal.get("goalIndex").getAsInt();
+               UUID uuid = UUID.fromString(completedGoal.get("completedByUuid").getAsString());
+               Goal goal = (Goal)lockout.getBoard().getGoals().get(goalIdx);
+               LockoutTeamServer team = (LockoutTeamServer)lockout.getPlayerTeam(uuid);
+               goal.setCompleted(true, team);
             }
-
-            Goal goal = (Goal)lockout.getBoard().getGoals().get(goalIdx);
-            LockoutTeamServer team = (LockoutTeamServer)lockout.getPlayerTeam(uuid);
-            team.addPoint();
-            goal.setCompleted(true, team);
+            for(Goal goal : lockout.getBoard().getGoals()) {
+               if (goal.getPendingChatMessage() != null && goal.isMarkedAsCompleted() && !goal.isCompleted()) {
+                  goal.setMarkedAsCompleted(false);
+                  lockout.completeGoal(goal, Minecraft.getInstance().getUser().getProfileId());
+               }
+            }
          }
-
       });
    }
 
